@@ -1,0 +1,18 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;    /* important for vertical centering */
+  width: 100%;     /* important for horizontal centering */
+  display: flex;
+  justify-content: center; /* horizontal centering */
+  align-items: center;     /* vertical centering */
+  background-color: #111;
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
