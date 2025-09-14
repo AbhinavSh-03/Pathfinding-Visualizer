@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 interface ControlsProps {
   onReset: () => void;
+  onVisualizeBFS: () => void;
 }
 
 const Wrapper = styled.div`
@@ -10,6 +11,7 @@ const Wrapper = styled.div`
   gap: 12px;
   margin-bottom: 20px;
   align-items: center;
+  justify-content: center;
 `;
 
 const Button = styled.button`
@@ -26,10 +28,11 @@ const Button = styled.button`
   }
 `;
 
-const Controls: React.FC<ControlsProps> = ({ onReset }) => {
+const Controls: React.FC<ControlsProps> = ({ onReset, onVisualizeBFS }) => {
   return (
     <Wrapper>
       <Button onClick={onReset}>Reset Grid</Button>
+      <Button onClick={onVisualizeBFS}>Visualize BFS</Button>
     </Wrapper>
   );
 };
