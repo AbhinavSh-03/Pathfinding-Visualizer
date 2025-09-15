@@ -1,9 +1,11 @@
+// src/components/Grid.tsx
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { bfs } from "../algorithms/bfs";
+import { dfs } from "../algorithms/dfs";
+import { dijkstra } from "../algorithms/dijkstra";
+import type { CellType, AlgorithmResult } from "../algorithms/types";
 import Cell from "./Cell";
-
-type CellType = "empty" | "start" | "end" | "wall" | "visited" | "path";
 
 const OuterWrapper = styled.div`
   display: flex;
@@ -34,15 +36,31 @@ const initialGrid = () =>
 interface GridProps {
   resetFlag: boolean;
   visualizeFlag: boolean;
+  algorithm: "BFS" | "DFS" | "Dijkstra";
+  speed: "Slow" | "Medium" | "Fast";
 }
 
-const Grid: React.FC<GridProps> = ({ resetFlag, visualizeFlag }) => {
+const Grid: React.FC<GridProps> = ({
+  resetFlag,
+  visualizeFlag,
+  algorithm,
+  speed,
+}) => {
   const [grid, setGrid] = useState<CellType[][]>(initialGrid);
   const [startPos, setStartPos] = useState<[number, number] | null>(null);
   const [endPos, setEndPos] = useState<[number, number] | null>(null);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
-  // Handle single click
+  // Animation speed settings
+  const speedSettings = {
+    Slow: { visitDelay: 80, pathDelay: 120 },
+    Medium: { visitDelay: 40, pathDelay: 70 },
+    Fast: { visitDelay: 15, pathDelay: 30 },
+  };
+
+  const { visitDelay, pathDelay } = speedSettings[speed];
+
+  // Handle single click (start, end, walls)
   const handleCellClick = (row: number, col: number) => {
     setGrid((prev) =>
       prev.map((r, i) =>
@@ -87,13 +105,29 @@ const Grid: React.FC<GridProps> = ({ resetFlag, visualizeFlag }) => {
     setEndPos(null);
   }, [resetFlag]);
 
-  // BFS visualization
+  // Visualization
   useEffect(() => {
     if (!visualizeFlag || !startPos || !endPos) return;
 
-    const { visitedOrder, path } = bfs(grid, startPos, endPos);
+    let result: AlgorithmResult;
 
-    // Animate visited
+    switch (algorithm) {
+      case "BFS":
+        result = bfs(grid, startPos, endPos);
+        break;
+      case "DFS":
+        result = dfs(grid, startPos, endPos);
+        break;
+      case "Dijkstra":
+        result = dijkstra(grid, startPos, endPos);
+        break;
+      default:
+        return;
+    }
+
+    const { visitedOrder, path } = result;
+
+    // Animate visited cells
     visitedOrder.forEach(([r, c], i) => {
       setTimeout(() => {
         setGrid((prev) =>
@@ -110,10 +144,10 @@ const Grid: React.FC<GridProps> = ({ resetFlag, visualizeFlag }) => {
             })
           )
         );
-      }, 30 * i);
+      }, visitDelay * i);
     });
 
-    // Animate path
+    // Animate path after visited
     setTimeout(() => {
       path.forEach(([r, c], i) => {
         setTimeout(() => {
@@ -132,15 +166,15 @@ const Grid: React.FC<GridProps> = ({ resetFlag, visualizeFlag }) => {
               })
             )
           );
-        }, 50 * i);
+        }, pathDelay * i);
       });
-    }, 30 * visitedOrder.length + 300);
-  }, [visualizeFlag]);
+    }, visitDelay * visitedOrder.length + 300);
+  }, [visualizeFlag, algorithm, speed]);
 
   return (
     <OuterWrapper
       onMouseDown={(e) => {
-        if (e.button === 0) setIsMouseDown(true); // left only
+        if (e.button === 0) setIsMouseDown(true);
       }}
       onMouseUp={() => setIsMouseDown(false)}
       onMouseLeave={() => setIsMouseDown(false)}

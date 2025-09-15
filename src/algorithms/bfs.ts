@@ -1,13 +1,11 @@
 // src/algorithms/bfs.ts
+import type { CellType, AlgorithmResult } from "./types";
 
-export type CellType = "empty" | "start" | "end" | "wall" | "visited" | "path";
-
-interface BFSResult {
-  visitedOrder: [number, number][];
-  path: [number, number][];
-}
-
-export function bfs(grid: CellType[][]): BFSResult {
+export function bfs(
+  grid: CellType[][],
+  start: [number, number],
+  end: [number, number]
+): AlgorithmResult {
   const rows = grid.length;
   const cols = grid[0].length;
 
@@ -18,19 +16,6 @@ export function bfs(grid: CellType[][]): BFSResult {
   const parent: Record<string, [number, number] | null> = {};
   const visitedOrder: [number, number][] = [];
   const path: [number, number][] = [];
-
-  let start: [number, number] | null = null;
-  let end: [number, number] | null = null;
-
-  // Find start and end
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === "start") start = [r, c];
-      if (grid[r][c] === "end") end = [r, c];
-    }
-  }
-
-  if (!start || !end) return { visitedOrder, path };
 
   const queue: [number, number][] = [];
   queue.push(start);
@@ -44,7 +29,6 @@ export function bfs(grid: CellType[][]): BFSResult {
     [0, -1],
   ];
 
-  // BFS Loop
   while (queue.length) {
     const [r, c] = queue.shift()!;
     visitedOrder.push([r, c]);
@@ -70,7 +54,6 @@ export function bfs(grid: CellType[][]): BFSResult {
     }
   }
 
-  // Backtrack to build path
   let curr: [number, number] | null = end;
   while (curr) {
     path.push(curr);
